@@ -15,7 +15,7 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class DatabaseAutoConfigurationTest {
+public class DatabaseSourceAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(DatabaseAutoConfiguration.class));

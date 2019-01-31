@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,6 +41,6 @@ public class MultiJpaDatabaseProperties {
         private String physicalNamingStrategy;
         private int jdbcBatchSize;
 
-        private Map<String, String> additional;
+        private Map<String, String> additional = Collections.emptyMap();
     }
 }
