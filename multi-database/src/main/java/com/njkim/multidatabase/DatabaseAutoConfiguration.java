@@ -20,9 +20,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
@@ -143,7 +145,8 @@ public class DatabaseAutoConfiguration {
         }
 
         @Bean
-        public JpaTransactionManager transactionManager() {
+        @Primary
+        public PlatformTransactionManager transactionManager() {
             JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
             jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
             return jpaTransactionManager;
