@@ -20,7 +20,7 @@ import org.springframework.core.annotation.Order;
  */
 @Slf4j
 @Aspect
-@Order(value = Ordered.HIGHEST_PRECEDENCE)
+@Order(value = Ordered.HIGHEST_PRECEDENCE + 1)
 public class DatabaseSelector {
 
     @Around("@annotation(selectDB)")
