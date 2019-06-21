@@ -15,6 +15,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<hibernate.version>5.4.3.Final</hibernate.version>
+		<org.aspectj.version>1.9.4</org.aspectj.version>
 	</properties>
 
 	<dependencies>
@@ -48,6 +49,17 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>${org.aspectj.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${org.aspectj.version}</version>
+		</dependency>
+
 
 		<!-- lombok -->
 		<dependency>

@@ -1,5 +1,6 @@
 package com.njkim.multidatabase;
 
+import com.njkim.multidatabase.aspect.DatabaseSelector;
 import com.njkim.multidatabase.model.CurrentTenantResolver;
 import com.njkim.multidatabase.model.DatasourceBasedMultiTenantConnectionProvider;
 import com.njkim.multidatabase.model.datasource.NamedDataSource;
@@ -54,6 +55,11 @@ public class DatabaseAutoConfiguration {
     public DatabaseAutoConfiguration(MultiDatasourceProperties properties, ApplicationContext applicationContext) {
         this.properties = properties;
         this.applicationContext = applicationContext;
+    }
+
+    @Bean
+    public DatabaseSelector databaseSelector() {
+        return new DatabaseSelector();
     }
 
     @Bean
