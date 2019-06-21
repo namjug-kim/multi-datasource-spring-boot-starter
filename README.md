@@ -24,7 +24,7 @@ multi:
         dialect: org.hibernate.dialect.H2Dialect
         format-sql: true
         show-sql: true
-        ddl-auto: validate
+        ddl-auto: VALIDATE
     datasource:
       enable: true
       data-sources:
