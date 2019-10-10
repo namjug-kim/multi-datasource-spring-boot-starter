@@ -124,7 +124,10 @@ public class DatabaseAutoConfiguration {
         @Bean
         public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
             Map<String, Object> properties = new HashMap<>();
-            properties.put(Environment.HBM2DDL_AUTO, multiJpaDatabaseProperties.getHibernate().getDdlAuto().getProperties());
+            
+            if(multiJpaDatabaseProperties.getHibernate().getDdlAuto() != null) {
+                properties.put(Environment.HBM2DDL_AUTO, multiJpaDatabaseProperties.getHibernate().getDdlAuto().getProperties());
+            }
             properties.put(Environment.DIALECT, multiJpaDatabaseProperties.getHibernate().getDialect());
             properties.put(Environment.SHOW_SQL, multiJpaDatabaseProperties.getHibernate().isShowSql());
             properties.put(Environment.FORMAT_SQL, multiJpaDatabaseProperties.getHibernate().isFormatSql());
