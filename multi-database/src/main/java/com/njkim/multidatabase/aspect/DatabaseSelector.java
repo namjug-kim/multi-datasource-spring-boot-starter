@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
@@ -46,6 +47,34 @@ public class DatabaseSelector {
             TenantContextHolder.setCurrentTenantId(databaseName);
 
             return proceedingJoinPoint.proceed();
+        } finally {
+            TenantContextHolder.removeCurrentTenantId();
+        }
+    }
+
+    @Pointcut("execution(public !void org.springframework.data.repository.Repository+.*(..))")
+    public void publicNonVoidRepositoryMethod() {
+    }
+
+    @Around("publicNonVoidRepositoryMethod()")
+    public Object publicNonVoidRepositoryMethod(ProceedingJoinPoint pjp) throws Throwable {
+        SelectDB selectDB = null;
+        for (Class<?> i : pjp.getTarget().getClass().getInterfaces()) {
+            selectDB = i.getAnnotation(SelectDB.class);
+            if (selectDB != null) {
+                break;
+            }
+        }
+
+        if (selectDB == null) {
+            return pjp.proceed();
+        }
+
+        try {
+            String databaseName = selectDB.name();
+            TenantContextHolder.setCurrentTenantId(databaseName);
+
+            return pjp.proceed();
         } finally {
             TenantContextHolder.removeCurrentTenantId();
         }
