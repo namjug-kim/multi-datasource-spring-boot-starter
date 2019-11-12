@@ -24,7 +24,21 @@ import org.springframework.core.annotation.Order;
 public class DatabaseSelector {
 
     @Around("@annotation(selectDB)")
-    public Object selectDB(ProceedingJoinPoint proceedingJoinPoint, SelectDB selectDB) throws Throwable {
+    public Object selectDbForMethod(ProceedingJoinPoint proceedingJoinPoint, SelectDB selectDB) throws Throwable {
+        log.debug("Select Database - target : {}", selectDB.name());
+
+        try {
+            String databaseName = selectDB.name();
+            TenantContextHolder.setCurrentTenantId(databaseName);
+
+            return proceedingJoinPoint.proceed();
+        } finally {
+            TenantContextHolder.removeCurrentTenantId();
+        }
+    }
+
+    @Around("@within(selectDB)")
+    public Object selectDbForType(ProceedingJoinPoint proceedingJoinPoint, SelectDB selectDB) throws Throwable {
         log.debug("Select Database - target : {}", selectDB.name());
 
         try {
