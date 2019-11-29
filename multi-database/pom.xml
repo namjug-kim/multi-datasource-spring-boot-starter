@@ -15,7 +15,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<hibernate.version>5.4.8.Final</hibernate.version>
-		<org.aspectj.version>1.9.4</org.aspectj.version>
+		<org.aspectj.version>1.9.5</org.aspectj.version>
 	</properties>
 
 	<dependencies>
