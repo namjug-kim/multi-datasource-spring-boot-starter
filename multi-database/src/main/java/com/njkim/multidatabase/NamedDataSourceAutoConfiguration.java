@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -24,9 +25,9 @@ import java.util.List;
 public class NamedDataSourceAutoConfiguration {
     private final MultiDatasourceProperties properties;
 
-    private final GenericApplicationContext applicationContext;
+    private final AnnotationConfigApplicationContext applicationContext;
 
-    public NamedDataSourceAutoConfiguration(MultiDatasourceProperties properties, GenericApplicationContext applicationContext) {
+    public NamedDataSourceAutoConfiguration(MultiDatasourceProperties properties, AnnotationConfigApplicationContext applicationContext) {
         this.properties = properties;
         this.applicationContext = applicationContext;
         createDataSourcesBean();
