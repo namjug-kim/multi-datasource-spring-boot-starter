@@ -18,11 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DatabaseSourceAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(DatabaseAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(NamedDataSourceAutoConfiguration.class, JpaAutoConfiguration.class));
 
     @Test
     public void singleDataSourceBeanCreate() {
-
         this.contextRunner
                 .withPropertyValues("multi.database.datasource.enable=true")
                 .withUserConfiguration(MultiDataSourceConfig.class)
@@ -34,7 +33,6 @@ public class DatabaseSourceAutoConfigurationTest {
 
     @Test
     public void multiDataSourceBeanCreate() {
-
         this.contextRunner
                 .withPropertyValues("multi.database.datasource.enable=true")
                 .withUserConfiguration(MultiDataSourceConfig.class)
