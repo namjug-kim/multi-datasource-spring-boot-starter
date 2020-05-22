@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.njkim.multidatabase.DatabaseAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.njkim.multidatabase.NamedDataSourceAutoConfiguration, com.njkim.multidatabase.JpaAutoConfiguration

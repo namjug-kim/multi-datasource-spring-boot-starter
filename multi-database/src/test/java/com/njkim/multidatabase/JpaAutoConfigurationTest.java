@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import java.util.Arrays;
 
@@ -16,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class JpaAutoConfigurationTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(DatabaseAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(JpaAutoConfiguration.class));
 
     @Test
     public void jpaBeanCreate() {
