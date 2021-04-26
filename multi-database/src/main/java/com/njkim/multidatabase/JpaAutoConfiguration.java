@@ -1,29 +1,36 @@
 package com.njkim.multidatabase;
 
+import com.njkim.multidatabase.aspect.DatabaseSelector;
 import com.njkim.multidatabase.model.CurrentTenantResolver;
 import com.njkim.multidatabase.model.DatasourceBasedMultiTenantConnectionProvider;
 import com.njkim.multidatabase.model.datasource.NamedDataSourceContainer;
+import com.njkim.multidatabase.properties.MultiDatasourceProperties;
 import com.njkim.multidatabase.properties.MultiJpaDatabaseProperties;
+import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.cfg.Environment;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.AbstractDataSourceBasedMultiTenantConnectionProviderImpl;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -37,16 +44,18 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @ConditionalOnProperty(name = "multi.database.jpa.enable", havingValue = "true")
-@EnableConfigurationProperties(MultiJpaDatabaseProperties.class)
-@EnableTransactionManagement(proxyTargetClass = true)
-@EnableAspectJAutoProxy(proxyTargetClass = true)
-@AutoConfigureAfter(NamedDataSourceAutoConfiguration.class)
-public class JpaAutoConfiguration {
+@EnableConfigurationProperties({MultiJpaDatabaseProperties.class, MultiDatasourceProperties.class})
+public class JpaAutoConfiguration implements BeanFactoryAware {
     private final MultiJpaDatabaseProperties multiJpaDatabaseProperties;
 
+    private final MultiDatasourceProperties multiDatasourceProperties;
+
+    private DefaultListableBeanFactory beanFactory;
+
     @Autowired
-    public JpaAutoConfiguration(MultiJpaDatabaseProperties multiJpaDatabaseProperties) {
+    public JpaAutoConfiguration(MultiJpaDatabaseProperties multiJpaDatabaseProperties, MultiDatasourceProperties multiDatasourceProperties) {
         this.multiJpaDatabaseProperties = multiJpaDatabaseProperties;
+        this.multiDatasourceProperties = multiDatasourceProperties;
     }
 
     @Bean
@@ -55,8 +64,8 @@ public class JpaAutoConfiguration {
     }
 
     @Bean
-    public AbstractDataSourceBasedMultiTenantConnectionProviderImpl multiTenantConnectionProvider(List<NamedDataSourceContainer> namedDataSourceContainers) {
-        Map<String, NamedDataSourceContainer> dataSourceContainerMap = namedDataSourceContainers.stream()
+    public AbstractDataSourceBasedMultiTenantConnectionProviderImpl multiTenantConnectionProvider() {
+        Map<String, NamedDataSourceContainer> dataSourceContainerMap = this.createNamedDataSourceContainersBean().stream()
                 .collect(Collectors.toMap(NamedDataSourceContainer::getName, o -> o));
 
         return new DatasourceBasedMultiTenantConnectionProvider(dataSourceContainerMap);
@@ -71,6 +80,7 @@ public class JpaAutoConfiguration {
     }
 
     @Bean
+    @Primary
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(MultiTenantConnectionProvider multiTenantConnectionProvider) {
         Map<String, Object> properties = new HashMap<>();
 
@@ -101,9 +111,43 @@ public class JpaAutoConfiguration {
     }
 
     @Bean
+    @Primary
     public JpaTransactionManager transactionManager(LocalContainerEntityManagerFactoryBean entityManagerFactory) {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory.getObject());
         return jpaTransactionManager;
+    }
+
+    @Bean
+    public DatabaseSelector databaseSelector() {
+        return new DatabaseSelector();
+    }
+
+    public List<NamedDataSourceContainer> createNamedDataSourceContainersBean() {
+        List<MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties> dataSourceTargetProperties = multiDatasourceProperties.getDataSources();
+
+        List<NamedDataSourceContainer> namedDataSourceContainers = dataSourceTargetProperties.stream().map(this::createNamedDatasourceContainer)
+                .collect(Collectors.toList());
+
+        namedDataSourceContainers.forEach(namedDataSourceContainer -> {
+            beanFactory.registerSingleton(namedDataSourceContainer.getName() + "-master-datasource", namedDataSourceContainer.getMaster());
+            AtomicInteger index = new AtomicInteger();
+            namedDataSourceContainer.getSlaves().forEach(slaveDataSource -> beanFactory.registerSingleton(namedDataSourceContainer.getName() + "-slave-datasource-" + index.getAndIncrement(), slaveDataSource));
+        });
+
+        return namedDataSourceContainers;
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = (DefaultListableBeanFactory) beanFactory;
+    }
+
+    private NamedDataSourceContainer createNamedDatasourceContainer(MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties properties) {
+        DataSource masterDataSource = new HikariDataSource(properties.getMaster());
+        List<DataSource> slaveDataSources = properties.getSlaves().stream()
+                .map(HikariDataSource::new)
+                .collect(Collectors.toList());
+        return NamedDataSourceContainer.create(properties.getName(), masterDataSource, slaveDataSources);
     }
 }

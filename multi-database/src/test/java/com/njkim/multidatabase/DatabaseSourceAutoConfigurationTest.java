@@ -19,12 +19,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DatabaseSourceAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(NamedDataSourceAutoConfiguration.class, JpaAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(JpaAutoConfiguration.class));
 
     @Test
     public void singleDataSourceBeanCreate() {
         this.contextRunner
-                .withPropertyValues("multi.database.datasource.enable=true")
+                .withPropertyValues(
+                        "multi.database.jpa.enable=true",
+                        "multi.database.jpa.database-platform=H2",
+                        "multi.database.jpa.packages-to-scan=com.njkim.multidatabase",
+                        "multi.database.jpa.hibernate.ddl-auto=NONE",
+                        "multi.database.jpa.hibernate.jdbc-batch-size=1",
+                        "multi.database.jpa.hibernate.dialect= org.hibernate.dialect.H2Dialect"
+                )
                 .withUserConfiguration(MultiDataSourceConfig.class)
                 .run((context) ->
                         assertThat(context)
@@ -35,7 +42,14 @@ public class DatabaseSourceAutoConfigurationTest {
     @Test
     public void multiDataSourceBeanCreate() {
         this.contextRunner
-                .withPropertyValues("multi.database.datasource.enable=true")
+                .withPropertyValues(
+                        "multi.database.jpa.enable=true",
+                        "multi.database.jpa.database-platform=H2",
+                        "multi.database.jpa.packages-to-scan=com.njkim.multidatabase",
+                        "multi.database.jpa.hibernate.ddl-auto=NONE",
+                        "multi.database.jpa.hibernate.jdbc-batch-size=1",
+                        "multi.database.jpa.hibernate.dialect= org.hibernate.dialect.H2Dialect"
+                )
                 .withUserConfiguration(MultiDataSourceConfig.class)
                 .run((context) ->
                         assertThat(context)

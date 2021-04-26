@@ -2,10 +2,14 @@ package com.njkim.multidatabase.model;
 
 import com.njkim.multidatabase.model.datasource.NamedDataSourceContainer;
 import org.hibernate.engine.jdbc.connections.spi.AbstractDataSourceBasedMultiTenantConnectionProviderImpl;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Please describe the role of the DatasourceBasedMultiTenantConnectionProvider
@@ -18,10 +22,13 @@ import java.util.Map;
  */
 public class DatasourceBasedMultiTenantConnectionProvider extends AbstractDataSourceBasedMultiTenantConnectionProviderImpl {
 
-    private final Map<String, NamedDataSourceContainer> dataSourceMap;
+    private final Map<String, DataSource> dataSourceMap;
 
     public DatasourceBasedMultiTenantConnectionProvider(Map<String, NamedDataSourceContainer> dataSourceMap) {
-        this.dataSourceMap = dataSourceMap;
+        this.dataSourceMap = new HashMap<>();
+        dataSourceMap.forEach((tenantId, namedDataSourceContainer) ->
+                this.dataSourceMap.put(tenantId, new LazyConnectionDataSourceProxy(new ReplicationRoutingDataSource(namedDataSourceContainer)))
+        );
     }
 
     @Override
@@ -31,13 +38,42 @@ public class DatasourceBasedMultiTenantConnectionProvider extends AbstractDataSo
 
     @Override
     protected DataSource selectDataSource(String tenantIdentifier) {
-        NamedDataSourceContainer namedDataSourceContainer = dataSourceMap.get(tenantIdentifier);
+        DataSource dataSource = dataSourceMap.get(tenantIdentifier);
 
-        if (namedDataSourceContainer == null) {
+        if (dataSource == null) {
             throw new RuntimeException("Not found Data Source for " + tenantIdentifier);
         }
 
+        return dataSource;
+    }
+}
+
+class ReplicationRoutingDataSource extends AbstractRoutingDataSource {
+    private static final String MASTER_NAME = "master";
+    private static final String SLAVE_NAME = "slave";
+    private final AtomicInteger index = new AtomicInteger(0);
+    private final int slaveSize;
+
+    public ReplicationRoutingDataSource(NamedDataSourceContainer namedDataSourceContainer) {
+        this.slaveSize = namedDataSourceContainer.getSlaves().size();
+
+        Map<Object, Object> namedDataSourceMap = new HashMap<>();
+        namedDataSourceMap.put(MASTER_NAME, namedDataSourceContainer.getMaster());
+        int index = 0;
+        for (DataSource slave : namedDataSourceContainer.getSlaves()) {
+            namedDataSourceMap.put(SLAVE_NAME + index++, slave);
+        }
+        this.setTargetDataSources(namedDataSourceMap);
+        this.afterPropertiesSet();
+    }
+
+    @Override
+    protected Object determineCurrentLookupKey() {
         boolean isReadOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
-        return namedDataSourceContainer.getDataSource(isReadOnly);
+        if (!isReadOnly) {
+            return MASTER_NAME;
+        } else {
+            return SLAVE_NAME + (index.incrementAndGet() % slaveSize);
+        }
     }
 }
