@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +28,7 @@ public class DatabaseSourceAutoConfigurationTest {
                 .withUserConfiguration(MultiDataSourceConfig.class)
                 .run((context) ->
                         assertThat(context)
-                                .hasBean("default-datasource")
+                                .hasBean("default-master-datasource")
                 );
     }
 
@@ -38,8 +39,8 @@ public class DatabaseSourceAutoConfigurationTest {
                 .withUserConfiguration(MultiDataSourceConfig.class)
                 .run((context) ->
                         assertThat(context)
-                                .hasBean("default-datasource")
-                                .hasBean("second-datasource")
+                                .hasBean("default-master-datasource")
+                                .hasBean("second-master-datasource")
                 );
     }
 
@@ -56,11 +57,11 @@ public class DatabaseSourceAutoConfigurationTest {
 
             MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties namedRoutingDataSourceTargetProperties = new MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties();
             namedRoutingDataSourceTargetProperties.setName("default");
-            namedRoutingDataSourceTargetProperties.setHikari(hikariConfig);
+            namedRoutingDataSourceTargetProperties.setMaster(hikariConfig);
 
             MultiDatasourceProperties multiDatasourceProperties = new MultiDatasourceProperties();
             multiDatasourceProperties.setEnable(true);
-            multiDatasourceProperties.setDataSources(Arrays.asList(namedRoutingDataSourceTargetProperties));
+            multiDatasourceProperties.setDataSources(Collections.singletonList(namedRoutingDataSourceTargetProperties));
 
             return multiDatasourceProperties;
         }
@@ -79,11 +80,11 @@ public class DatabaseSourceAutoConfigurationTest {
 
             MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties defaultDatasourceProperties = new MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties();
             defaultDatasourceProperties.setName("default");
-            defaultDatasourceProperties.setHikari(hikariConfig);
+            defaultDatasourceProperties.setMaster(hikariConfig);
 
             MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties secondDatasourceProperties = new MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties();
             secondDatasourceProperties.setName("second");
-            secondDatasourceProperties.setHikari(hikariConfig);
+            secondDatasourceProperties.setMaster(hikariConfig);
 
             MultiDatasourceProperties multiDatasourceProperties = new MultiDatasourceProperties();
             multiDatasourceProperties.setEnable(true);

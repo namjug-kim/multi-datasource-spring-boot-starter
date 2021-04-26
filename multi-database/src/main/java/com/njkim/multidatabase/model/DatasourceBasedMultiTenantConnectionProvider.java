@@ -1,6 +1,8 @@
 package com.njkim.multidatabase.model;
 
+import com.njkim.multidatabase.model.datasource.NamedDataSourceContainer;
 import org.hibernate.engine.jdbc.connections.spi.AbstractDataSourceBasedMultiTenantConnectionProviderImpl;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -16,25 +18,26 @@ import java.util.Map;
  */
 public class DatasourceBasedMultiTenantConnectionProvider extends AbstractDataSourceBasedMultiTenantConnectionProviderImpl {
 
-    private Map<String, DataSource> dataSourceMap;
+    private final Map<String, NamedDataSourceContainer> dataSourceMap;
 
-    public DatasourceBasedMultiTenantConnectionProvider(Map<String, DataSource> dataSourceMap) {
+    public DatasourceBasedMultiTenantConnectionProvider(Map<String, NamedDataSourceContainer> dataSourceMap) {
         this.dataSourceMap = dataSourceMap;
     }
 
     @Override
     protected DataSource selectAnyDataSource() {
-        return dataSourceMap.get("default");
+        return selectDataSource("default");
     }
 
     @Override
     protected DataSource selectDataSource(String tenantIdentifier) {
-        DataSource dataSource = dataSourceMap.get(tenantIdentifier);
+        NamedDataSourceContainer namedDataSourceContainer = dataSourceMap.get(tenantIdentifier);
 
-        if (dataSource == null) {
+        if (namedDataSourceContainer == null) {
             throw new RuntimeException("Not found Data Source for " + tenantIdentifier);
         }
 
-        return dataSource;
+        boolean isReadOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
+        return namedDataSourceContainer.getDataSource(isReadOnly);
     }
 }

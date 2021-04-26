@@ -2,7 +2,7 @@ package com.njkim.multidatabase;
 
 import com.njkim.multidatabase.model.CurrentTenantResolver;
 import com.njkim.multidatabase.model.DatasourceBasedMultiTenantConnectionProvider;
-import com.njkim.multidatabase.model.datasource.NamedDataSource;
+import com.njkim.multidatabase.model.datasource.NamedDataSourceContainer;
 import com.njkim.multidatabase.properties.MultiJpaDatabaseProperties;
 import org.hibernate.cfg.Environment;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
@@ -21,7 +21,6 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +55,11 @@ public class JpaAutoConfiguration {
     }
 
     @Bean
-    public AbstractDataSourceBasedMultiTenantConnectionProviderImpl multiTenantConnectionProvider(List<NamedDataSource> namedDataSources) {
-        Map<String, DataSource> dataSourceMap = namedDataSources.stream()
-                .collect(Collectors.toMap(NamedDataSource::getName, o -> (DataSource) o));
+    public AbstractDataSourceBasedMultiTenantConnectionProviderImpl multiTenantConnectionProvider(List<NamedDataSourceContainer> namedDataSourceContainers) {
+        Map<String, NamedDataSourceContainer> dataSourceContainerMap = namedDataSourceContainers.stream()
+                .collect(Collectors.toMap(NamedDataSourceContainer::getName, o -> o));
 
-        return new DatasourceBasedMultiTenantConnectionProvider(dataSourceMap);
+        return new DatasourceBasedMultiTenantConnectionProvider(dataSourceContainerMap);
     }
 
     private HibernateJpaVendorAdapter vendorAdaptor() {

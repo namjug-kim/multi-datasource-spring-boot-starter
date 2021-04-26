@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,15 +24,13 @@ public class MultiDatasourceProperties {
 
     private boolean enable;
 
-    private String defaultDataSource = "default";
-
     private List<NamedRoutingDataSourceTargetProperties> dataSources;
 
     @Getter
     @Setter
     public static class NamedRoutingDataSourceTargetProperties {
-
         private String name;
-        private HikariConfig hikari;
+        private HikariConfig master;
+        private List<HikariConfig> slaves = new ArrayList<>();
     }
 }

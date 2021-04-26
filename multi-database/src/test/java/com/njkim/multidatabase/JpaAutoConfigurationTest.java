@@ -53,11 +53,11 @@ public class JpaAutoConfigurationTest {
 
             MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties defaultDatasourceProperties = new MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties();
             defaultDatasourceProperties.setName("default");
-            defaultDatasourceProperties.setHikari(hikariConfig);
+            defaultDatasourceProperties.setMaster(hikariConfig);
 
             MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties secondDatasourceProperties = new MultiDatasourceProperties.NamedRoutingDataSourceTargetProperties();
             secondDatasourceProperties.setName("second");
-            secondDatasourceProperties.setHikari(hikariConfig);
+            secondDatasourceProperties.setMaster(hikariConfig);
 
             MultiDatasourceProperties multiDatasourceProperties = new MultiDatasourceProperties();
             multiDatasourceProperties.setEnable(true);

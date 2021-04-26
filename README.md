@@ -29,7 +29,7 @@ multi:
       enable: true
       data-sources:
       - name: default
-        hikari:
+        master:
           jdbc-url: jdbc:h2:mem:master;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;IGNORECASE=TRUE
           username: sa
           password: sa
@@ -39,7 +39,7 @@ multi:
           connectionTimeout: 10000
           connectionTestQuery: SELECT 1
       - name: second
-        hikari:
+        master:
           jdbc-url: jdbc:h2:mem:second;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;IGNORECASE=TRUE
           username: sa
           password: sa
