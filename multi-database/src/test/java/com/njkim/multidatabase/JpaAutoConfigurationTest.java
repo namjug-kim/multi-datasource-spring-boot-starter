@@ -2,7 +2,7 @@ package com.njkim.multidatabase;
 
 import com.njkim.multidatabase.properties.MultiDatasourceProperties;
 import com.zaxxer.hikari.HikariConfig;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;

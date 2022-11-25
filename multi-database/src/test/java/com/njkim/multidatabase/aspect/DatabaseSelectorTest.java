@@ -10,9 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.FluentQuery;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 class DatabaseSelectorTest {
     @Test
@@ -117,6 +119,11 @@ class SelectorTypeTestInterfaceImpl implements SelectorTypeTestInterface {
     }
 
     @Override
+    public void deleteAllById(Iterable<? extends String> strings) {
+
+    }
+
+    @Override
     public void deleteAll(Iterable<? extends String> iterable) {
 
     }
@@ -157,7 +164,22 @@ class SelectorTypeTestInterfaceImpl implements SelectorTypeTestInterface {
     }
 
     @Override
+    public <S extends String> List<S> saveAllAndFlush(Iterable<S> entities) {
+        return null;
+    }
+
+    @Override
     public void deleteInBatch(Iterable<String> iterable) {
+
+    }
+
+    @Override
+    public void deleteAllInBatch(Iterable<String> entities) {
+
+    }
+
+    @Override
+    public void deleteAllByIdInBatch(Iterable<String> strings) {
 
     }
 
@@ -168,6 +190,16 @@ class SelectorTypeTestInterfaceImpl implements SelectorTypeTestInterface {
 
     @Override
     public String getOne(String s) {
+        return null;
+    }
+
+    @Override
+    public String getById(String s) {
+        return null;
+    }
+
+    @Override
+    public String getReferenceById(String s) {
         return null;
     }
 
@@ -199,6 +231,11 @@ class SelectorTypeTestInterfaceImpl implements SelectorTypeTestInterface {
     @Override
     public <S extends String> boolean exists(Example<S> example) {
         return false;
+    }
+
+    @Override
+    public <S extends String, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+        return null;
     }
 }
 
