@@ -30,7 +30,7 @@ public class JpaAutoConfigurationTest {
                         "multi.database.jpa.hibernate.jdbc-batch-size=1",
                         "multi.database.jpa.hibernate.dialect= org.hibernate.dialect.H2Dialect"
                 )
-                .withUserConfiguration(DatabaseSourceAutoConfigurationTest.MultiDataSourceConfig.class)
+                .withUserConfiguration(DatabaseSourceAutoConfigurationTest.MultiDataSourceConfig.class, MultiDatasourceMetricConfiguration.class)
                 .run((context) ->
                         assertThat(context)
                                 .hasBean("entityManagerFactory")
